@@ -4,7 +4,7 @@ const { nanoid } = require("nanoid");
 
 const contactsPath = path.join(__dirname, "./contacts.json");
 
-const updateListContacts = async (contacts) =>
+const updateContacts = async (contacts) =>
   fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
 
 const listContacts = async () => {
@@ -13,44 +13,42 @@ const listContacts = async () => {
 };
 
 const getContactById = async (contactId) => {
-  const getAllContacts = await listContacts();
-  const result = getAllContacts.find(({ id }) => id === contactId);
+  const contacts = await listContacts();
+  const result = contacts.find((item) => item.id === contactId);
   return result || null;
 };
 
 const removeContact = async (contactId) => {
-  const getAllContacts = await listContacts();
-  const index = getAllContacts.findIndex(({ id }) => id === contactId);
+  const contacts = await listContacts();
+  const index = contacts.findIndex((item) => item.id === contactId);
   if (index === -1) {
     return null;
   }
-  const [result] = getAllContacts.splice(index, 1);
-  await updateListContacts(getAllContacts);
+  const [result] = contacts.splice(index, 1);
+  await updateContacts(contacts);
   return result;
 };
 
-const addContact = async (name, email, phone) => {
-  const getAllContacts = await listContacts();
+const addContact = async (data) => {
+  const contacts = await listContacts();
   const newContact = {
     id: nanoid(),
-    name,
-    email,
-    phone,
+    ...data,
   };
-  getAllContacts.push(newContact);
-  await updateListContacts(getAllContacts);
+  contacts.push(newContact);
+  await updateContacts(contacts);
   return newContact;
 };
 
 const updateContact = async (contactId, body) => {
-  const getAllContacts = await listContacts();
-  const index = getAllContacts.findIndex((item) => item.id === contactId);
+  const contacts = await listContacts();
+  const index = contacts.findIndex((item) => item.id === contactId);
   if (index === -1) {
     return null;
   }
-  getAllContacts[index] = { contactId, ...body };
-  await updateListContacts(getAllContacts);
-  return getAllContacts[index];
+  contacts[index] = { contactId, ...body };
+  await updateContacts(contacts);
+  return contacts[index];
 };
 
 module.exports = {
